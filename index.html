@@ -682,7 +682,6 @@ a{ color: inherit; }
       <div class="hero-copy">
         <p class="eyebrow">Personal Sourcing Intelligence</p>
         <h1 id="hero-heading">A single ledger for every <em>verified</em> sourcing point.</h1>
-        <p class="lede">One hundred 1688 factories, prices, and MOQs across toys and stationery — structured, searchable, and always open. No more hunting through spreadsheets for the right supplier.</p>
         <div class="hero-actions">
           <a href="#catalog" class="btn btn-primary">Browse the catalog</a>
           <a href="#categories" class="btn btn-ghost">View categories</a>
@@ -772,7 +771,7 @@ a{ color: inherit; }
       <div class="section-head">
         <div>
           <p class="eyebrow">By Category</p>
-          <h2 id="categories-heading">Thirteen toy lines, seven stationery lines.</h2>
+          <h2 id="categories-heading">Every category, mapped.</h2>
           <p class="lede">Select a category to jump straight to its filtered catalog view.</p>
         </div>
       </div>
@@ -842,11 +841,11 @@ a{ color: inherit; }
 
   /* Config-driven dataset registry — add a new sourcing list by adding one entry here. */
   var DATASETS = [
-    { key: 'toys',        label: 'Toys',              data: TOYS,        hasMargin: true,  hasDemand: true,  hasTarget: false },
-    { key: 'stationery',  label: 'Stationery',         data: STATIONERY, hasMargin: false, hasDemand: false, hasTarget: true  },
-    { key: 'drinkware',   label: 'Fancy Drinkware',    data: DRINKWARE,  hasMargin: true,  hasDemand: false, hasTarget: true  },
-    { key: 'footwear',    label: 'Men Footwear',       data: FOOTWEAR,   hasMargin: true,  hasDemand: false, hasTarget: true  },
-    { key: 'accessories', label: 'Ladies Accessories', data: ACCESSORIES,hasMargin: true,  hasDemand: false, hasTarget: true  }
+    { key: 'toys',        label: 'Toys',              lineLabel: 'toy',                 data: TOYS,        hasMargin: true,  hasDemand: true,  hasTarget: false },
+    { key: 'stationery',  label: 'Stationery',         lineLabel: 'stationery',          data: STATIONERY, hasMargin: false, hasDemand: false, hasTarget: true  },
+    { key: 'drinkware',   label: 'Fancy Drinkware',    lineLabel: 'drinkware',           data: DRINKWARE,  hasMargin: true,  hasDemand: false, hasTarget: true  },
+    { key: 'footwear',    label: 'Men Footwear',       lineLabel: 'men\u2019s footwear', data: FOOTWEAR,   hasMargin: true,  hasDemand: false, hasTarget: true  },
+    { key: 'accessories', label: 'Ladies Accessories', lineLabel: 'ladies\u2019 accessories', data: ACCESSORIES,hasMargin: true,  hasDemand: false, hasTarget: true  }
   ];
   function datasetConfig(key){ return DATASETS.filter(function(d){ return d.key === key; })[0]; }
 
@@ -1004,8 +1003,11 @@ a{ color: inherit; }
   function renderCategoryGrid(){
     var wrap = document.getElementById('categoryGrid');
     var html = '';
+    var parts = [];
     DATASETS.forEach(function(d){
       var counts = categoryCounts(d.data);
+      var n = Object.keys(counts).length;
+      parts.push(n + ' ' + d.lineLabel + ' ' + (n === 1 ? 'line' : 'lines'));
       Object.keys(counts).sort().forEach(function(c){
         html += '<button type="button" class="category-card" data-dataset="'+d.key+'" data-category="'+encodeURIComponent(c)+'">' +
           '<span class="cc-set">'+d.label+'</span><h3>'+cleanLabel(c)+'</h3>' +
@@ -1013,6 +1015,12 @@ a{ color: inherit; }
       });
     });
     wrap.innerHTML = html;
+
+    var heading = document.getElementById('categories-heading');
+    if (parts.length){
+      var last = parts.pop();
+      heading.textContent = (parts.length ? parts.join(', ') + ', and ' + last : last) + '.';
+    }
 
     wrap.querySelectorAll('.category-card').forEach(function(btn){
       btn.addEventListener('click', function(){
