@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Sourcing — Private Sourcing Ledger</title>
+<meta name="description" content="A private index of verified 1688 sourcing points across toys and stationery.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1B1D21">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Meridian">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  /* color */
+  --charcoal:        #1B1D21;
+  --charcoal-soft:    #2B2E33;
+  --slate:            #5B6270;
+  --slate-light:      #8B92A0;
+  --fog:              #F3F4F6;
+  --fog-deep:         #E8E9EC;
+  --hairline:         #DCDEE2;
+  --white:            #FFFFFF;
+  --accent:           #A8471F;
+  --accent-deep:      #7E3417;
+  --accent-tint:      #F1E1D6;
+
+  /* type */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* 8px spacing grid */
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 40px;
+  --sp-6: 48px;
+  --sp-7: 64px;
+  --sp-8: 80px;
+  --sp-9: 96px;
+  --sp-10: 120px;
+
+  /* layout */
+  --container: 1240px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --nav-h: 88px;
+
+  /* motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+*, *::before, *::after{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+body{
+  margin:0;
+  font-family: var(--font-sans);
+  color: var(--charcoal);
+  background: var(--white);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+h1,h2,h3,h4{ margin:0; font-family: var(--font-serif); font-weight:600; letter-spacing:-0.01em; }
+p{ margin:0; }
+ul{ margin:0; padding:0; list-style:none; }
+img,svg{ display:block; max-width:100%; }
+button{ font-family: inherit; }
+a{ color: inherit; }
+
+/* focus visibility — accessibility floor */
+:focus{ outline:none; }
+:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* skip link */
+.skip-link{
+  position:absolute;
+  left:-9999px;
+  top:0;
+  background: var(--charcoal);
+  color: var(--white);
+  padding: var(--sp-2) var(--sp-3);
+  z-index: 999;
+  font-weight:600;
+  font-size: 14px;
+}
+.skip-link:focus{ left: var(--sp-2); top: var(--sp-2); }
+
+.container{
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 var(--sp-4);
+}
+@media (max-width: 640px){ .container{ padding: 0 var(--sp-3); } }
+
+.eyebrow{
+  font-size: 12px;
+  font-weight:600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ============================================================
+   NAV — transparent over hero, solidifies after 100px scroll
+   ============================================================ */
+.site-nav{
+  position: fixed;
+  top:0; left:0; right:0;
+  height: var(--nav-h);
+  z-index: 100;
+  display:flex;
+  align-items:center;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background-color 320ms var(--ease), border-color 320ms var(--ease), box-shadow 320ms var(--ease), height 320ms var(--ease);
+}
+.site-nav.is-scrolled{
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 4px 24px rgba(27,29,33,0.06);
+  height: 72px;
+}
+.nav-inner{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap: var(--sp-2);
+  line-height:1.15;
+  color: var(--white);
+  transition: color 320ms var(--ease);
+  text-decoration:none;
+}
+.site-nav.is-scrolled .brand{ color: var(--charcoal); }
+.brand-icon{ flex-shrink:0; color: inherit; transition: color 320ms var(--ease); }
+.brand-text{ display:flex; flex-direction:column; }
+.brand-mark{ font-family: var(--font-serif); font-size:19px; font-weight:600; letter-spacing:-0.01em; }
+.brand-sub{ font-size:10px; letter-spacing:0.16em; text-transform:uppercase; opacity:0.72; margin-top:2px; }
+
+.nav-links{
+  display:flex;
+  align-items:center;
+  gap: var(--sp-5);
+}
+.nav-links a{
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.03em;
+  text-decoration:none;
+  color: rgba(255,255,255,0.88);
+  padding: var(--sp-1) 2px;
+  border-bottom: 1px solid transparent;
+  transition: color 320ms var(--ease), border-color 200ms var(--ease);
+}
+.site-nav.is-scrolled .nav-links a{ color: var(--slate); }
+.nav-links a:hover, .nav-links a:focus-visible{ color: var(--accent); border-color: var(--accent); }
+.nav-links a.current{ color: var(--white); }
+.site-nav.is-scrolled .nav-links a.current{ color: var(--charcoal); border-color: var(--accent); }
+
+@media (max-width: 780px){
+  .nav-links{ display:none; }
+}
+
+/* ============================================================
+   HERO — asymmetrical 60/40 grid
+   ============================================================ */
+.hero{
+  position:relative;
+  min-height: 92vh;
+  display:flex;
+  align-items:center;
+  background: var(--charcoal);
+  overflow:hidden;
+  padding-top: var(--nav-h);
+}
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 82% 18%, rgba(168,71,31,0.16), transparent 42%),
+    linear-gradient(180deg, #1B1D21 0%, #202329 100%);
+  pointer-events:none;
+}
+.hero-grid{
+  position:relative;
+  z-index:1;
+  width:100%;
+  display:grid;
+  grid-template-columns: 60% 40%;
+  align-items:center;
+  gap: var(--sp-6);
+}
+.hero-copy{ max-width: 620px; }
+.hero-copy .eyebrow{ color: var(--accent); }
+.hero-copy h1{
+  margin-top: var(--sp-3);
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 1.06;
+  color: var(--white);
+}
+.hero-copy h1 em{
+  font-style: italic;
+  color: var(--accent);
+  font-weight:500;
+}
+.hero-copy .lede{
+  margin-top: var(--sp-4);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--slate-light);
+  max-width: 520px;
+}
+.hero-actions{
+  margin-top: var(--sp-6);
+  display:flex;
+  gap: var(--sp-3);
+  flex-wrap:wrap;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap: 10px;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:0.02em;
+  text-decoration:none;
+  padding: 15px 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor:pointer;
+  transition: transform 200ms var(--ease), background-color 200ms var(--ease), border-color 200ms var(--ease), color 200ms var(--ease);
+}
+.btn-primary{ background: var(--accent); color: var(--white); }
+.btn-primary:hover{ background: var(--accent-deep); transform: translateY(-1px); }
+.btn-ghost{ background: transparent; color: var(--white); border-color: rgba(255,255,255,0.28); }
+.btn-ghost:hover{ border-color: var(--white); transform: translateY(-1px); }
+
+.hero-mark{
+  position:relative;
+  height: min(52vh, 520px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.hero-mark svg{ width:100%; height:100%; }
+
+@media (max-width: 900px){
+  .hero-grid{ grid-template-columns: 1fr; }
+  .hero-mark{ height: 220px; order:-1; margin-bottom: var(--sp-2); opacity:0.9; }
+  .hero{ padding-bottom: var(--sp-6); }
+}
+
+/* ============================================================
+   STATS BAND
+   ============================================================ */
+.stats-band{
+  background: var(--charcoal-soft);
+  padding: var(--sp-6) 0;
+}
+.stats-grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-4);
+}
+.stat-item{
+  padding: 0 var(--sp-3);
+  border-left: 1px solid rgba(255,255,255,0.14);
+}
+.stat-item:first-child{ border-left:none; padding-left:0; }
+.stat-num{
+  font-family: var(--font-serif);
+  font-size: 34px;
+  color: var(--white);
+  font-weight:600;
+}
+.stat-label{
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--slate-light);
+  letter-spacing:0.04em;
+}
+@media (max-width: 780px){
+  .stats-grid{ grid-template-columns: repeat(2, 1fr); row-gap: var(--sp-4); }
+  .stat-item:nth-child(3){ border-left:none; padding-left:0; }
+}
+
+/* ============================================================
+   SECTION SCAFFOLDING
+   ============================================================ */
+.section{ padding: var(--sp-9) 0; }
+.section-alt{ background: var(--fog); }
+.section-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+  flex-wrap:wrap;
+}
+.section-head h2{
+  margin-top: var(--sp-2);
+  font-size: clamp(28px, 3.4vw, 40px);
+  color: var(--charcoal);
+}
+.section-head .lede{
+  margin-top: var(--sp-2);
+  color: var(--slate);
+  max-width: 560px;
+  font-size:15px;
+}
+
+/* ============================================================
+   FILTER BAR
+   ============================================================ */
+.filter-bar{
+  display:flex;
+  align-items:center;
+  gap: var(--sp-3);
+  flex-wrap:wrap;
+  padding: var(--sp-3);
+  background: var(--white);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--sp-5);
+}
+.dataset-toggle{
+  display:flex;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  overflow:hidden;
+  flex-shrink:0;
+}
+.dataset-toggle button{
+  border:none;
+  background: var(--white);
+  color: var(--slate);
+  font-size:13px;
+  font-weight:600;
+  padding: var(--sp-2) var(--sp-3);
+  cursor:pointer;
+  transition: background-color 180ms var(--ease), color 180ms var(--ease);
+}
+.dataset-toggle button + button{ border-left:1px solid var(--hairline); }
+.dataset-toggle button[aria-pressed="true"]{ background: var(--charcoal); color: var(--white); }
+.dataset-toggle button:hover:not([aria-pressed="true"]){ background: var(--fog); }
+
+.field-search{
+  position:relative;
+  flex:1 1 220px;
+  min-width: 200px;
+}
+.field-search input{
+  width:100%;
+  padding: 11px var(--sp-3) 11px 38px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  font-size:14px;
+  font-family: var(--font-sans);
+  color: var(--charcoal);
+  background: var(--fog) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%235B6270" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>') no-repeat 12px center;
+  background-size: 15px 15px;
+}
+.field-search input:focus-visible{ background-color: var(--white); }
+
+.field-select select{
+  padding: 11px 36px 11px var(--sp-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  font-size:14px;
+  font-family: var(--font-sans);
+  color: var(--charcoal);
+  background: var(--fog);
+  appearance:none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%235B6270" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>');
+  background-repeat:no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 14px;
+  min-width: 220px;
+}
+
+.result-count{
+  margin-left:auto;
+  font-size:12px;
+  color: var(--slate);
+  white-space:nowrap;
+}
+
+/* ============================================================
+   CARD GRID — hover reveal
+   ============================================================ */
+.card-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-3);
+}
+.card{
+  position:relative;
+  background: var(--white);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+  cursor:pointer;
+  overflow:hidden;
+  min-height: 176px;
+  transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease), transform 200ms var(--ease);
+}
+.card:hover, .card:focus-visible, .card.is-open{
+  border-color: var(--accent);
+  box-shadow: 0 12px 28px rgba(27,29,33,0.10);
+  transform: translateY(-2px);
+}
+.card-eyebrow{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color: var(--accent);
+  display:block;
+}
+.card-title{
+  margin-top: 8px;
+  font-family: var(--font-serif);
+  font-size:19px;
+  font-weight:600;
+  color: var(--charcoal);
+  line-height:1.25;
+}
+.card-meta{
+  margin-top: var(--sp-2);
+  display:flex;
+  flex-direction:column;
+  gap: 4px;
+  font-size:12.5px;
+  color: var(--slate);
+}
+.card-meta span b{ color: var(--charcoal-soft); font-weight:600; }
+
+.card-reveal{
+  position:absolute;
+  inset:0;
+  background: var(--charcoal);
+  color: var(--fog);
+  padding: var(--sp-3);
+  display:flex;
+  flex-direction:column;
+  gap: var(--sp-2);
+  opacity:0;
+  transform: translateY(6px);
+  pointer-events:none;
+  transition: opacity 220ms var(--ease), transform 220ms var(--ease);
+  overflow-y:auto;
+}
+.card:hover .card-reveal,
+.card:focus-visible .card-reveal,
+.card.is-open .card-reveal{
+  opacity:1;
+  transform: translateY(0);
+  pointer-events:auto;
+}
+.card-reveal dt{
+  font-size:10px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color: var(--accent);
+  font-weight:700;
+}
+.card-reveal dd{
+  margin:2px 0 0 0;
+  font-size:12.5px;
+  line-height:1.5;
+  color: var(--fog-deep);
+}
+.card-reveal-hint{
+  position:absolute;
+  bottom: var(--sp-2);
+  right: var(--sp-3);
+  font-size:10px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color: var(--slate-light);
+}
+
+.empty-state{
+  grid-column: 1 / -1;
+  text-align:center;
+  padding: var(--sp-7) var(--sp-3);
+  color: var(--slate);
+  border: 1px dashed var(--hairline);
+  border-radius: var(--radius-md);
+}
+.empty-state strong{ display:block; color: var(--charcoal); font-family: var(--font-serif); font-size:20px; margin-bottom:6px; }
+
+/* ============================================================
+   CATEGORY CARDS
+   ============================================================ */
+.category-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--sp-3);
+}
+.category-card{
+  background: var(--white);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  padding: var(--sp-3);
+  text-align:left;
+  cursor:pointer;
+  transition: border-color 200ms var(--ease), transform 200ms var(--ease), box-shadow 200ms var(--ease);
+}
+.category-card:hover, .category-card:focus-visible{
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(27,29,33,0.08);
+}
+.category-card .cc-set{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color: var(--slate-light);
+}
+.category-card h3{
+  margin-top:6px;
+  font-size:17px;
+  font-family: var(--font-serif);
+  color: var(--charcoal);
+  line-height:1.3;
+}
+.category-card .cc-count{
+  margin-top: var(--sp-2);
+  font-size:12.5px;
+  color: var(--accent);
+  font-weight:600;
+}
+
+/* ============================================================
+   INSIGHTS
+   ============================================================ */
+.insights-grid{
+  display:grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--sp-6);
+}
+@media (max-width: 900px){ .insights-grid{ grid-template-columns: 1fr; } }
+
+.bar-list{ display:flex; flex-direction:column; gap: var(--sp-2); }
+.bar-row{ display:grid; grid-template-columns: 190px 1fr 46px; align-items:center; gap: var(--sp-2); }
+.bar-row .bar-label{ font-size:12.5px; color: var(--charcoal-soft); }
+.bar-track{ height:8px; background: var(--fog-deep); border-radius:99px; overflow:hidden; }
+.bar-fill{ height:100%; background: var(--accent); border-radius:99px; }
+.bar-row .bar-value{ font-size:12px; color: var(--slate); text-align:right; }
+
+.note-card{
+  background: var(--charcoal);
+  color: var(--fog);
+  border-radius: var(--radius-md);
+  padding: var(--sp-5);
+}
+.note-card .eyebrow{ color: var(--accent); }
+.note-card h3{
+  margin-top: var(--sp-2);
+  font-size:22px;
+  color: var(--white);
+  line-height:1.3;
+}
+.note-card p{
+  margin-top: var(--sp-3);
+  font-size:14px;
+  line-height:1.7;
+  color: var(--slate-light);
+}
+.note-card ul{ margin-top: var(--sp-3); display:flex; flex-direction:column; gap: 10px; }
+.note-card li{
+  font-size:13px;
+  color: var(--fog-deep);
+  padding-left: 18px;
+  position:relative;
+}
+.note-card li::before{
+  content:"";
+  position:absolute;
+  left:0; top:7px;
+  width:6px; height:6px;
+  background: var(--accent);
+  border-radius:50%;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer{
+  background: var(--charcoal);
+  color: var(--slate-light);
+  padding: var(--sp-6) 0 var(--sp-5);
+}
+.footer-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: var(--sp-4);
+  flex-wrap:wrap;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: var(--sp-4);
+}
+.footer-brand{ font-family: var(--font-serif); color: var(--white); font-size:16px; }
+.footer-meta{ font-size:12px; letter-spacing:0.02em; }
+.footer-meta a{ color: var(--accent); text-decoration:none; }
+.footer-meta a:hover{ text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<header>
+  <nav class="site-nav" id="siteNav" aria-label="Primary">
+    <div class="container nav-inner">
+      <a href="#hero" class="brand" aria-label="Meridian Sourcing — home">
+        <svg class="brand-icon" width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width="2.4"/>
+          <ellipse cx="32" cy="32" rx="9" ry="22" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.5"/>
+          <line x1="32" y1="6" x2="32" y2="58" stroke="currentColor" stroke-width="2.4"/>
+          <line x1="10" y1="32" x2="54" y2="32" stroke="currentColor" stroke-width="1.4" opacity="0.3"/>
+          <g transform="translate(32,21) rotate(-6)">
+            <rect x="-7.5" y="-7.5" width="15" height="15" rx="1.4" fill="#A8471F"/>
+            <text x="0" y="0.5" text-anchor="middle" dominant-baseline="central" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">信</text>
+          </g>
+        </svg>
+        <span class="brand-text">
+          <span class="brand-mark">Meridian</span>
+          <span class="brand-sub">Sourcing · Private Index</span>
+        </span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#hero">Overview</a></li>
+        <li><a href="#catalog">Catalog</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#insights">Insights</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero" aria-labelledby="hero-heading">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Personal Sourcing Intelligence</p>
+        <h1 id="hero-heading">A single ledger for every <em>verified</em> sourcing point.</h1>
+        <p class="lede">One hundred 1688 factories, prices, and MOQs across toys and stationery — structured, searchable, and always open. No more hunting through spreadsheets for the right supplier.</p>
+        <div class="hero-actions">
+          <a href="#catalog" class="btn btn-primary">Browse the catalog</a>
+          <a href="#categories" class="btn btn-ghost">View categories</a>
+        </div>
+      </div>
+      <div class="hero-mark" aria-hidden="true">
+        <svg viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg">
+          <line x1="60" y1="380" x2="340" y2="40" stroke="#3A3D44" stroke-width="1.5"/>
+          <g stroke="#4B4F57" stroke-width="2">
+            <line x1="76" y1="368" x2="106" y2="368"/>
+            <line x1="92" y1="343" x2="122" y2="343"/>
+            <line x1="108" y1="318" x2="138" y2="318"/>
+            <line x1="124" y1="293" x2="154" y2="293"/>
+            <line x1="140" y1="268" x2="170" y2="268"/>
+            <line x1="156" y1="243" x2="186" y2="243"/>
+            <line x1="188" y1="193" x2="218" y2="193"/>
+            <line x1="204" y1="168" x2="234" y2="168"/>
+            <line x1="220" y1="143" x2="250" y2="143"/>
+            <line x1="236" y1="118" x2="266" y2="118"/>
+            <line x1="252" y1="93" x2="282" y2="93"/>
+            <line x1="268" y1="68" x2="298" y2="68"/>
+          </g>
+          <line x1="163" y1="222" x2="200" y2="222" stroke="#A8471F" stroke-width="3"/>
+          <circle cx="200" cy="222" r="7" fill="#A8471F"/>
+          <circle cx="200" cy="222" r="15" fill="none" stroke="#A8471F" stroke-width="1" opacity="0.5"/>
+          <circle cx="200" cy="222" r="26" fill="none" stroke="#A8471F" stroke-width="1" opacity="0.25"/>
+          <circle cx="60" cy="380" r="4" fill="#5B6270"/>
+          <circle cx="340" cy="40" r="4" fill="#5B6270"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="stats-band" aria-label="Key figures">
+    <div class="container stats-grid">
+      <div class="stat-item">
+        <div class="stat-num" id="statTotal">—</div>
+        <div class="stat-label">Sourcing points indexed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="statCategories">—</div>
+        <div class="stat-label">Categories covered</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="statFactories">—</div>
+        <div class="stat-label">Distinct 1688 factories</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="statMargin">—</div>
+        <div class="stat-label">Average toy margin</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CATALOG ============ -->
+  <section class="section" id="catalog" aria-labelledby="catalog-heading">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">The Catalog</p>
+          <h2 id="catalog-heading">Every product, priced and placed.</h2>
+          <p class="lede">Search by name, factory, or 1688 keyword. Select a card — or press Enter on it — to reveal the full sourcing profile.</p>
+        </div>
+      </div>
+
+      <div class="filter-bar" role="search" aria-label="Filter catalog">
+        <div class="dataset-toggle" role="group" aria-label="Product line">
+          <button type="button" data-dataset="toys" aria-pressed="true">Toys (65)</button>
+          <button type="button" data-dataset="stationery" aria-pressed="false">Stationery (35)</button>
+        </div>
+        <div class="field-search">
+          <label class="visually-hidden" for="searchInput">Search products</label>
+          <input type="text" id="searchInput" placeholder="Search product, factory, or keyword…" autocomplete="off">
+        </div>
+        <div class="field-select">
+          <label class="visually-hidden" for="categorySelect">Filter by category</label>
+          <select id="categorySelect"></select>
+        </div>
+        <p class="result-count" id="resultCount" aria-live="polite"></p>
+      </div>
+
+      <div class="card-grid" id="cardGrid" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ============ CATEGORIES ============ -->
+  <section class="section section-alt" id="categories" aria-labelledby="categories-heading">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">By Category</p>
+          <h2 id="categories-heading">Thirteen toy lines, seven stationery lines.</h2>
+          <p class="lede">Select a category to jump straight to its filtered catalog view.</p>
+        </div>
+      </div>
+      <div class="category-grid" id="categoryGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ INSIGHTS ============ -->
+  <section class="section" id="insights" aria-labelledby="insights-heading">
+    <div class="container insights-grid">
+      <div>
+        <p class="eyebrow">Insights</p>
+        <h2 id="insights-heading">Where the volume sits.</h2>
+        <p class="lede" style="margin-bottom:32px;">Product count by category, largest first.</p>
+        <div class="bar-list" id="barList"></div>
+      </div>
+      <div class="note-card">
+        <p class="eyebrow">Reading the Ledger</p>
+        <h3>How this replaces the spreadsheet</h3>
+        <p>Both source files — toys and stationery — are indexed in full below, with nothing summarized away. Each card carries the same fields the original files held.</p>
+        <ul>
+          <li>Search matches product name, factory, and 1688 keyword at once.</li>
+          <li>Toy cards reveal margin and seasonal demand; stationery cards reveal target customer.</li>
+          <li>Category filters and search combine — narrow by both at the same time.</li>
+          <li>Everything renders client-side from the embedded dataset, so it works offline once loaded.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer" role="contentinfo">
+  <div class="container footer-inner">
+    <span class="footer-brand">Meridian Sourcing</span>
+    <p class="footer-meta">A private, personal reference tool for 1688 sourcing research — not for external distribution.</p>
+  </div>
+</footer>
+
+<style>
+.visually-hidden{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+</style>
+
+<script id="toys-data" type="application/json">[{"category": "Lighting Guns & Pistols (লাইটিং গান ও পিস্তল)", "product": "LED Light Up Toy Gun (LED লাইট আপ টয় গান)", "factory": "汕头市澄海区乐宝玩具厂 (Shantou Chenghai Lebao Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$0.80 - $3.00 per pc (প্রতি পিস $0.80 - $3.00)", "keywords": "发光玩具枪批发 (Light Up Toy Gun Wholesale)", "margin": "40-60%", "demand": "Eid + Puja + Year-round (ঈদ + পূজা + সারা বছর)"}, {"category": "Lighting Guns & Pistols (লাইটিং গান ও পিস্তল)", "product": "Laser Tag Blaster (লেজার ট্যাগ ব্লাস্টার)", "factory": "汕头市澄海区星辉玩具 (Shantou Chenghai Xinghui Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $6.00 per pc (প্রতি পিস $2.00 - $6.00)", "keywords": "激光对战枪批发 (Laser Tag Gun Wholesale)", "margin": "50-70%", "demand": "Eid + Puja + Year-round (ঈদ + পূজা + সারা বছর)"}, {"category": "Lighting Guns & Pistols (লাইটিং গান ও পিস্তল)", "product": "Sound & Light Pistol (সাউন্ড ও লাইট পিস্তল)", "factory": "汕头市澄海区奥飞玩具 (Shantou Chenghai Aofei Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.00 - $3.50 per pc (প্রতি পিস $1.00 - $3.50)", "keywords": "声光玩具枪批发 (Sound Light Toy Gun Wholesale)", "margin": "45-65%", "demand": "Eid + Puja + Year-round (ঈদ + পূজা + সারা বছর)"}, {"category": "Lighting Guns & Pistols (লাইটিং গান ও পিস্তল)", "product": "Gel Blaster Gun (জেল ব্লাস্টার গান)", "factory": "汕头市澄海区嘉达玩具 (Shantou Chenghai Jiada Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$3.00 - $8.00 per pc (প্রতি পিস $3.00 - $8.00)", "keywords": "水弹枪批发 (Gel Blaster Gun Wholesale)", "margin": "60-80%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Lighting Guns & Pistols (লাইটিং গান ও পিস্তল)", "product": "Nerf Style Foam Blaster (নার্ফ স্টাইল ফোম ব্লাস্টার)", "factory": "汕头市澄海区伟力玩具 (Shantou Chenghai Weili Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "200-500 pcs (200-500 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "软弹枪批发 (Foam Blaster Wholesale)", "margin": "50-70%", "demand": "Eid + Puja + Year-round (ঈদ + পূজা + সারা বছর)"}, {"category": "Lighting Cars (লাইটিং গাড়ি)", "product": "LED Light Up Racing Car (LED লাইট আপ রেসিং কার)", "factory": "汕头市澄海区双鹰玩具 (Shantou Chenghai Shuangying Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "发光玩具车批发 (Light Up Toy Car Wholesale)", "margin": "45-65%", "demand": "Year-round (সারা বছর)"}, {"category": "Lighting Cars (লাইটিং গাড়ি)", "product": "RC Drift Car with LED (RC ড্রিফট কার LED সহ)", "factory": "汕头市澄海区星辉互动娱乐 (Shantou Chenghai Xinghui Interactive)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$3.00 - $10.00 per pc (প্রতি পিস $3.00 - $10.00)", "keywords": "遥控漂移车批发 (RC Drift Car Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Lighting Cars (লাইটিং গাড়ি)", "product": "Light Up Monster Truck (লাইট আপ মনস্টার ট্রাক)", "factory": "汕头市澄海区高乐玩具 (Shantou Chenghai Gaole Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$2.00 - $5.00 per pc (প্রতি পিস $2.00 - $5.00)", "keywords": "发光怪兽车批发 (Light Up Monster Truck Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Lighting Cars (লাইটিং গাড়ি)", "product": "Musical Light Car (মিউজিক্যাল লাইট কার)", "factory": "汕头市澄海区实丰玩具 (Shantou Chenghai Shifeng Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.00 - $3.00 per pc (প্রতি পিস $1.00 - $3.00)", "keywords": "音乐玩具车批发 (Musical Toy Car Wholesale)", "margin": "40-60%", "demand": "Year-round (সারা বছর)"}, {"category": "Lighting Cars (লাইটিং গাড়ি)", "product": "360 Spinning Light Car (360 স্পিনিং লাইট কার)", "factory": "汕头市澄海区群兴玩具 (Shantou Chenghai Qunxing Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.50 - $6.00 per pc (প্রতি পিস $2.50 - $6.00)", "keywords": "旋转发光车批发 (Spinning Light Car Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Remote Control Toys (রিমোট কন্ট্রোল খেলনা)", "product": "RC Stunt Car (RC স্টান্ট কার)", "factory": "汕头市澄海区环奇玩具 (Shantou Chenghai Huanqi Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$3.00 - $10.00 per pc (প্রতি পিস $3.00 - $10.00)", "keywords": "遥控特技车批发 (RC Stunt Car Wholesale)", "margin": "50-70%", "demand": "Eid + Puja + Birthdays (ঈদ + পূজা + জন্মদিন)"}, {"category": "Remote Control Toys (রিমোট কন্ট্রোল খেলনা)", "product": "RC Helicopter (RC হেলিকপ্টার)", "factory": "汕头市澄海区雅得玩具 (Shantou Chenghai Yade Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$5.00 - $15.00 per pc (প্রতি পিস $5.00 - $15.00)", "keywords": "遥控直升机批发 (RC Helicopter Wholesale)", "margin": "55-75%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Remote Control Toys (রিমোট কন্ট্রোল খেলনা)", "product": "RC Boat (RC বোট)", "factory": "汕头市澄海区司马玩具 (Shantou Chenghai Sima Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$4.00 - $12.00 per pc (প্রতি পিস $4.00 - $12.00)", "keywords": "遥控船批发 (RC Boat Wholesale)", "margin": "50-70%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Remote Control Toys (রিমোট কন্ট্রোল খেলনা)", "product": "RC Tank (RC ট্যাংক)", "factory": "汕头市澄海区恒龙玩具 (Shantou Chenghai Henglong Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$5.00 - $15.00 per pc (প্রতি পিস $5.00 - $15.00)", "keywords": "遥控坦克批发 (RC Tank Wholesale)", "margin": "55-75%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Remote Control Toys (রিমোট কন্ট্রোল খেলনা)", "product": "RC Construction Vehicle (RC কনস্ট্রাকশন ভেহিকল)", "factory": "汕头市澄海区汇纳玩具 (Shantou Chenghai Huina Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$4.00 - $10.00 per pc (প্রতি পিস $4.00 - $10.00)", "keywords": "遥控工程车批发 (RC Construction Vehicle Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Electronic Toys (ইলেকট্রনিক খেলনা)", "product": "Electronic Pet Robot (ইলেকট্রনিক পেট রোবট)", "factory": "东莞市银辉玩具 (Dongguan Yinhu Toys)", "location": "Dongguan, Guangdong (东莞, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $6.00 per pc (প্রতি পিস $2.00 - $6.00)", "keywords": "电子宠物玩具批发 (Electronic Pet Toy Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Electronic Toys (ইলেকট্রনিক খেলনা)", "product": "Talking Toy Phone (টকিং টয় ফোন)", "factory": "汕头市澄海区美致玩具 (Shantou Chenghai Meizhi Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "会说话的玩具手机批发 (Talking Toy Phone Wholesale)", "margin": "45-65%", "demand": "Year-round (সারা বছর)"}, {"category": "Electronic Toys (ইলেকট্রনিক খেলনা)", "product": "Interactive Smart Toy (ইন্টারঅ্যাক্টিভ স্মার্ট টয়)", "factory": "深圳市奥飞娱乐 (Shenzhen Aofei Entertainment)", "location": "Shenzhen, Guangdong (深圳, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$3.00 - $8.00 per pc (প্রতি পিস $3.00 - $8.00)", "keywords": "智能互动玩具批发 (Smart Interactive Toy Wholesale)", "margin": "55-75%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Electronic Toys (ইলেকট্রনিক খেলনা)", "product": "Electronic Keyboard Piano (ইলেকট্রনিক কীবোর্ড পিয়ানো)", "factory": "汕头市澄海区骅威玩具 (Shantou Chenghai Huawei Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.50 - $7.00 per pc (প্রতি পিস $2.50 - $7.00)", "keywords": "儿童电子琴批发 (Kids Electronic Piano Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Electronic Toys (ইলেকট্রনিক খেলনা)", "product": "Voice Recording Doll (ভয়েস রেকর্ডিং ডল)", "factory": "东莞市智乐堡玩具 (Dongguan Zhilebao Toys)", "location": "Dongguan, Guangdong (东莞, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$2.00 - $5.00 per pc (প্রতি পিস $2.00 - $5.00)", "keywords": "录音娃娃批发 (Recording Doll Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Water Guns & Blasters (ওয়াটার গান ও ব্লাস্টার)", "product": "High Pressure Water Gun (হাই প্রেসার ওয়াটার গান)", "factory": "汕头市澄海区宏达玩具 (Shantou Chenghai Hongda Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.00 - $3.00 per pc (প্রতি পিস $1.00 - $3.00)", "keywords": "高压水枪批发 (High Pressure Water Gun Wholesale)", "margin": "50-70%", "demand": "Summer (গ্রীষ্ম - March-August)"}, {"category": "Water Guns & Blasters (ওয়াটার গান ও ব্লাস্টার)", "product": "Electric Water Blaster (ইলেকট্রিক ওয়াটার ব্লাস্টার)", "factory": "汕头市澄海区华达玩具 (Shantou Chenghai Huada Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.50 - $6.00 per pc (প্রতি পিস $2.50 - $6.00)", "keywords": "电动水枪批发 (Electric Water Gun Wholesale)", "margin": "55-75%", "demand": "Summer (গ্রীষ্ম - March-August)"}, {"category": "Water Guns & Blasters (ওয়াটার গান ও ব্লাস্টার)", "product": "Backpack Water Gun (ব্যাকপ্যাক ওয়াটার গান)", "factory": "汕头市澄海区信宇玩具 (Shantou Chenghai Xinyu Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $5.00 per pc (প্রতি পিস $2.00 - $5.00)", "keywords": "背包水枪批发 (Backpack Water Gun Wholesale)", "margin": "50-70%", "demand": "Summer (গ্রীষ্ম - March-August)"}, {"category": "Water Guns & Blasters (ওয়াটার গান ও ব্লাস্টার)", "product": "Water Spray Gun (ওয়াটার স্প্রে গান)", "factory": "汕头市澄海区飞轮玩具 (Shantou Chenghai Feilun Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.80 - $2.50 per pc (প্রতি পিস $0.80 - $2.50)", "keywords": "喷水枪批发 (Water Spray Gun Wholesale)", "margin": "45-65%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Water Guns & Blasters (ওয়াটার গান ও ব্লাস্টার)", "product": "Foam Water Blaster (ফোম ওয়াটার ব্লাস্টার)", "factory": "汕头市澄海区金峰玩具 (Shantou Chenghai Jinfeng Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "泡沫水枪批发 (Foam Water Gun Wholesale)", "margin": "50-70%", "demand": "Summer (গ্রীষ্ম - March-August)"}, {"category": "Bubble Guns (বাবল গান)", "product": "Automatic Bubble Gun (অটোমেটিক বাবল গান)", "factory": "汕头市澄海区泡泡玩具 (Shantou Chenghai Paopao Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.80 - $2.50 per pc (প্রতি পিস $0.80 - $2.50)", "keywords": "全自动泡泡枪批发 (Automatic Bubble Gun Wholesale)", "margin": "60-80%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Bubble Guns (বাবল গান)", "product": "Dinosaur Bubble Gun (ডাইনোসর বাবল গান)", "factory": "汕头市澄海区欢乐玩具 (Shantou Chenghai Huanle Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "恐龙泡泡枪批发 (Dinosaur Bubble Gun Wholesale)", "margin": "55-75%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Bubble Guns (বাবল গান)", "product": "Light Up Bubble Gun (লাইট আপ বাবল গান)", "factory": "汕头市澄海区童乐玩具 (Shantou Chenghai Tongle Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.20 - $3.50 per pc (প্রতি পিস $1.20 - $3.50)", "keywords": "发光泡泡枪批发 (Light Up Bubble Gun Wholesale)", "margin": "60-80%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Bubble Guns (বাবল গান)", "product": "Rocket Bubble Launcher (রকেট বাবল লঞ্চার)", "factory": "汕头市澄海区梦幻玩具 (Shantou Chenghai Menghuan Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $5.00 per pc (প্রতি পিস $2.00 - $5.00)", "keywords": "火箭泡泡机批发 (Rocket Bubble Machine Wholesale)", "margin": "50-70%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Bubble Guns (বাবল গান)", "product": "Bubble Machine Gun (বাবল মেশিন গান)", "factory": "汕头市澄海区童趣玩具 (Shantou Chenghai Tongqu Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "泡泡机玩具批发 (Bubble Machine Toy Wholesale)", "margin": "55-75%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Dinosaur & Animal Toys (ডাইনোসর ও প্রাণী খেলনা)", "product": "Walking Dinosaur with Light (হাঁটা ডাইনোসর LED সহ)", "factory": "汕头市澄海区恐龙玩具 (Shantou Chenghai Konglong Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $6.00 per pc (প্রতি পিস $2.00 - $6.00)", "keywords": "走路恐龙玩具批发 (Walking Dinosaur Toy Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Dinosaur & Animal Toys (ডাইনোসর ও প্রাণী খেলনা)", "product": "Remote Control Dinosaur (RC ডাইনোসর)", "factory": "汕头市澄海区动物玩具 (Shantou Chenghai Dongwu Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$3.00 - $8.00 per pc (প্রতি পিস $3.00 - $8.00)", "keywords": "遥控恐龙玩具批发 (RC Dinosaur Toy Wholesale)", "margin": "55-75%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Dinosaur & Animal Toys (ডাইনোসর ও প্রাণী খেলনা)", "product": "Light Up Animal Figures (লাইট আপ অ্যানিমাল ফিগার)", "factory": "汕头市澄海区益智玩具 (Shantou Chenghai Yizhi Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.00 - $3.00 per pc (প্রতি পিস $1.00 - $3.00)", "keywords": "发光动物玩具批发 (Light Up Animal Toy Wholesale)", "margin": "45-65%", "demand": "Year-round (সারা বছর)"}, {"category": "Dinosaur & Animal Toys (ডাইনোসর ও প্রাণী খেলনা)", "product": "Dinosaur Egg Toy (ডাইনোসর এগ টয়)", "factory": "汕头市澄海区奇趣玩具 (Shantou Chenghai Qiqu Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "恐龙蛋玩具批发 (Dinosaur Egg Toy Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Dinosaur & Animal Toys (ডাইনোসর ও প্রাণী খেলনা)", "product": "Sound Dinosaur Robot (সাউন্ড ডাইনোসর রোবট)", "factory": "汕头市澄海区智能玩具 (Shantou Chenghai Zhineng Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.50 - $7.00 per pc (প্রতি পিস $2.50 - $7.00)", "keywords": "声控恐龙机器人批发 (Sound Dinosaur Robot Wholesale)", "margin": "55-75%", "demand": "Year-round (সারা বছর)"}, {"category": "Drone & Flying Toys (ড্রোন ও উড়ন্ত খেলনা)", "product": "Mini Drone with LED (মিনি ড্রোন LED সহ)", "factory": "汕头市澄海区司马航模 (Shantou Chenghai Sima Hangmo)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$5.00 - $15.00 per pc (প্রতি পিস $5.00 - $15.00)", "keywords": "迷你无人机批发 (Mini Drone Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Drone & Flying Toys (ড্রোন ও উড়ন্ত খেলনা)", "product": "Flying Ball Helicopter (ফ্লাইং বল হেলিকপ্টার)", "factory": "汕头市澄海区雅得航模 (Shantou Chenghai Yade Hangmo)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$2.00 - $6.00 per pc (প্রতি পিস $2.00 - $6.00)", "keywords": "飞行球直升机批发 (Flying Ball Helicopter Wholesale)", "margin": "55-75%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Drone & Flying Toys (ড্রোন ও উড়ন্ত খেলনা)", "product": "Gesture Control Drone (জেসচার কন্ট্রোল ড্রোন)", "factory": "深圳市大疆创新 (Shenzhen DJI Innovation)", "location": "Shenzhen, Guangdong (深圳, 广东)", "moq": "20-50 pcs (20-50 পিস)", "price": "$8.00 - $25.00 per pc (প্রতি পিস $8.00 - $25.00)", "keywords": "手势控制无人机批发 (Gesture Control Drone Wholesale)", "margin": "45-65%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Drone & Flying Toys (ড্রোন ও উড়ন্ত খেলনা)", "product": "LED Light Drone (LED লাইট ড্রোন)", "factory": "汕头市澄海区环奇航模 (Shantou Chenghai Huanqi Hangmo)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$4.00 - $12.00 per pc (প্রতি পিস $4.00 - $12.00)", "keywords": "LED灯光无人机批发 (LED Light Drone Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Drone & Flying Toys (ড্রোন ও উড়ন্ত খেলনা)", "product": "Flying Spinner UFO (ফ্লাইং স্পিনার UFO)", "factory": "汕头市澄海区飞轮航模 (Shantou Chenghai Feilun Hangmo)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "飞行指尖陀螺批发 (Flying Fidget Spinner Wholesale)", "margin": "60-80%", "demand": "Summer + Eid (গ্রীষ্ম + ঈদ)"}, {"category": "Robot & Transforming Toys (রোবট ও ট্রান্সফর্মিং খেলনা)", "product": "Transforming Robot Car (ট্রান্সফর্মিং রোবট কার)", "factory": "汕头市澄海区变形玩具 (Shantou Chenghai Bianxing Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $6.00 per pc (প্রতি পিস $2.00 - $6.00)", "keywords": "变形机器人车批发 (Transforming Robot Car Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Robot & Transforming Toys (রোবট ও ট্রান্সফর্মিং খেলনা)", "product": "Gesture Sensing Robot (জেসচার সেন্সিং রোবট)", "factory": "汕头市澄海区智能玩具 (Shantou Chenghai Zhineng Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$3.00 - $8.00 per pc (প্রতি পিস $3.00 - $8.00)", "keywords": "手势感应机器人批发 (Gesture Sensing Robot Wholesale)", "margin": "55-75%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Robot & Transforming Toys (রোবট ও ট্রান্সফর্মিং খেলনা)", "product": "Programmable Robot (প্রোগ্রামেবল রোবট)", "factory": "汕头市澄海区编程玩具 (Shantou Chenghai Biancheng Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "20-50 pcs (20-50 পিস)", "price": "$5.00 - $15.00 per pc (প্রতি পিস $5.00 - $15.00)", "keywords": "可编程机器人批发 (Programmable Robot Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Robot & Transforming Toys (রোবট ও ট্রান্সফর্মিং খেলনা)", "product": "Dancing Robot with Light (নাচা রোবট LED সহ)", "factory": "汕头市澄海区机器人玩具 (Shantou Chenghai Jiqiren Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.50 - $7.00 per pc (প্রতি পিস $2.50 - $7.00)", "keywords": "跳舞机器人批发 (Dancing Robot Wholesale)", "margin": "55-75%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Robot & Transforming Toys (রোবট ও ট্রান্সফর্মিং খেলনা)", "product": "Deformation Robot Toy (ডিফরমেশন রোবট টয়)", "factory": "汕头市澄海区变形机器人 (Shantou Chenghai Bianxing Jiqiren)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$3.00 - $8.00 per pc (প্রতি পিস $3.00 - $8.00)", "keywords": "变形玩具批发 (Deformation Toy Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Musical & Dancing Toys (সঙ্গীত ও নাচ খেলনা)", "product": "Dancing Cactus Toy (নাচা ক্যাকটাস টয়)", "factory": "汕头市澄海区音乐玩具 (Shantou Chenghai Yinyue Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $5.00 per pc (প্রতি পিস $2.00 - $5.00)", "keywords": "跳舞仙人掌玩具批发 (Dancing Cactus Toy Wholesale)", "margin": "55-75%", "demand": "Year-round (সারা বছর)"}, {"category": "Musical & Dancing Toys (সঙ্গীত ও নাচ খেলনা)", "product": "Musical Dancing Duck (মিউজিক্যাল নাচা হাঁস)", "factory": "汕头市澄海区舞蹈玩具 (Shantou Chenghai Wudao Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "跳舞鸭子玩具批发 (Dancing Duck Toy Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Musical & Dancing Toys (সঙ্গীত ও নাচ খেলনা)", "product": "Light Up Dancing Robot (লাইট আপ নাচা রোবট)", "factory": "汕头市澄海区灯光玩具 (Shantou Chenghai Dengguang Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.50 - $6.00 per pc (প্রতি পিস $2.50 - $6.00)", "keywords": "发光跳舞机器人批发 (Light Up Dancing Robot Wholesale)", "margin": "55-75%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Musical & Dancing Toys (সঙ্গীত ও নাচ খেলনা)", "product": "Singing Microphone Toy (গাওয়া মাইক্রোফোন টয়)", "factory": "汕头市澄海区唱歌玩具 (Shantou Chenghai Changge Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$1.00 - $3.00 per pc (প্রতি পিস $1.00 - $3.00)", "keywords": "儿童麦克风玩具批发 (Kids Microphone Toy Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Musical & Dancing Toys (সঙ্গীত ও নাচ খেলনা)", "product": "Musical Light Projector (মিউজিক্যাল লাইট প্রোজেক্টর)", "factory": "汕头市澄海区投影玩具 (Shantou Chenghai Touying Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $5.00 per pc (প্রতি পিস $2.00 - $5.00)", "keywords": "音乐投影灯批发 (Musical Projector Light Wholesale)", "margin": "50-70%", "demand": "Eid + Puja (ঈদ + পূজা)"}, {"category": "Educational STEM Toys (শিক্ষামূলক STEM খেলনা)", "product": "Building Block Set (বিল্ডিং ব্লক সেট)", "factory": "汕头市澄海区积木玩具 (Shantou Chenghai Jimu Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$1.50 - $4.00 per pc (প্রতি পিস $1.50 - $4.00)", "keywords": "积木玩具批发 (Building Block Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Educational STEM Toys (শিক্ষামূলক STEM খেলনা)", "product": "Magnetic Tiles Toy (ম্যাগনেটিক টাইলস টয়)", "factory": "汕头市澄海区磁力玩具 (Shantou Chenghai Cili Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$2.00 - $6.00 per pc (প্রতি পিস $2.00 - $6.00)", "keywords": "磁力片玩具批发 (Magnetic Tiles Wholesale)", "margin": "55-75%", "demand": "Year-round (সারা বছর)"}, {"category": "Educational STEM Toys (শিক্ষামূলক STEM খেলনা)", "product": "Science Experiment Kit (সায়েন্স এক্সপেরিমেন্ট কিট)", "factory": "汕头市澄海区科学玩具 (Shantou Chenghai Kexue Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$3.00 - $8.00 per pc (প্রতি পিস $3.00 - $8.00)", "keywords": "科学实验套装批发 (Science Experiment Kit Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Educational STEM Toys (শিক্ষামূলক STEM খেলনা)", "product": "Coding Robot Toy (কোডিং রোবট টয়)", "factory": "汕头市澄海区编程积木 (Shantou Chenghai Biancheng Jimu)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "20-50 pcs (20-50 পিস)", "price": "$5.00 - $15.00 per pc (প্রতি পিস $5.00 - $15.00)", "keywords": "编程积木玩具批发 (Coding Block Toy Wholesale)", "margin": "45-65%", "demand": "Year-round (সারা বছর)"}, {"category": "Educational STEM Toys (শিক্ষামূলক STEM খেলনা)", "product": "3D Puzzle Toy (3D পাজল টয়)", "factory": "汕头市澄海区拼图玩具 (Shantou Chenghai Pintu Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.00 - $3.00 per pc (প্রতি পিস $1.00 - $3.00)", "keywords": "3D拼图玩具批发 (3D Puzzle Toy Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Slime & Squishy Toys (স্লাইম ও স্কুইশি খেলনা)", "product": "DIY Slime Kit (DIY স্লাইম কিট)", "factory": "汕头市澄海区彩泥玩具 (Shantou Chenghai Caini Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.50 - $1.50 per pc (প্রতি পিস $0.50 - $1.50)", "keywords": "DIY史莱姆套装批发 (DIY Slime Kit Wholesale)", "margin": "70-90%", "demand": "Year-round (সারা বছর)"}, {"category": "Slime & Squishy Toys (স্লাইম ও স্কুইশি খেলনা)", "product": "Squishy Stress Toy (স্কুইশি স্ট্রেস টয়)", "factory": "汕头市澄海区解压玩具 (Shantou Chenghai Jieya Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.30 - $1.00 per pc (প্রতি পিস $0.30 - $1.00)", "keywords": "解压玩具批发 (Stress Relief Toy Wholesale)", "margin": "60-80%", "demand": "Year-round (সারা বছর)"}, {"category": "Slime & Squishy Toys (স্লাইম ও স্কুইশি খেলনা)", "product": "Glowing Slime Set (গ্লোয়িং স্লাইম সেট)", "factory": "汕头市澄海区发光彩泥 (Shantou Chenghai Faguang Caini)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-300 pcs (100-300 পিস)", "price": "$0.80 - $2.00 per pc (প্রতি পিস $0.80 - $2.00)", "keywords": "发光史莱姆批发 (Glowing Slime Wholesale)", "margin": "65-85%", "demand": "Year-round (সারা বছর)"}, {"category": "Slime & Squishy Toys (স্লাইম ও স্কুইশি খেলনা)", "product": "Slime Making Machine (স্লাইম মেকিং মেশিন)", "factory": "汕头市澄海区手工玩具 (Shantou Chenghai Shougong Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $5.00 per pc (প্রতি পিস $2.00 - $5.00)", "keywords": "史莱姆制作机批发 (Slime Making Machine Wholesale)", "margin": "55-75%", "demand": "Year-round (সারা বছর)"}, {"category": "Slime & Squishy Toys (স্লাইম ও স্কুইশি খেলনা)", "product": "Soft Squishy Animal (সফট স্কুইশি অ্যানিমাল)", "factory": "汕头市澄海区慢回弹玩具 (Shantou Chenghai Manhuitan Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.50 - $1.50 per pc (প্রতি পিস $0.50 - $1.50)", "keywords": "慢回弹玩具批发 (Slow Rising Squishy Wholesale)", "margin": "60-80%", "demand": "Year-round (সারা বছর)"}, {"category": "Kitchen & Pretend Play (রান্নাঘর ও ভান খেলা)", "product": "Mini Kitchen Set (মিনি কিচেন সেট)", "factory": "汕头市澄海区过家家玩具 (Shantou Chenghai Guojiajia Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$3.00 - $8.00 per pc (প্রতি পিস $3.00 - $8.00)", "keywords": "过家家厨房玩具批发 (Pretend Kitchen Toy Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Kitchen & Pretend Play (রান্নাঘর ও ভান খেলা)", "product": "Doctor Play Set (ডাক্তার প্লে সেট)", "factory": "汕头市澄海区医生玩具 (Shantou Chenghai Yisheng Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $6.00 per pc (প্রতি পিস $2.00 - $6.00)", "keywords": "医生玩具套装批发 (Doctor Play Set Wholesale)", "margin": "55-75%", "demand": "Year-round (সারা বছর)"}, {"category": "Kitchen & Pretend Play (রান্নাঘর ও ভান খেলা)", "product": "Tool Box Toy (টুল বক্স টয়)", "factory": "汕头市澄海区工具玩具 (Shantou Chenghai Gongju Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.50 - $7.00 per pc (প্রতি পিস $2.50 - $7.00)", "keywords": "儿童工具箱玩具批发 (Kids Tool Box Toy Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Kitchen & Pretend Play (রান্নাঘর ও ভান খেলা)", "product": "Shopping Cart Toy (শপিং কার্ট টয়)", "factory": "汕头市澄海区购物车玩具 (Shantou Chenghai Gouwuche Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$2.00 - $5.00 per pc (প্রতি পিস $2.00 - $5.00)", "keywords": "购物车玩具批发 (Shopping Cart Toy Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}, {"category": "Kitchen & Pretend Play (রান্নাঘর ও ভান খেলা)", "product": "Barbecue Play Set (বারবিকিউ প্লে সেট)", "factory": "汕头市澄海区烧烤玩具 (Shantou Chenghai Shaokao Toys)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$3.00 - $8.00 per pc (প্রতি পিস $3.00 - $8.00)", "keywords": "烧烤玩具套装批发 (BBQ Play Set Wholesale)", "margin": "50-70%", "demand": "Year-round (সারা বছর)"}]</script>
+<script id="stationery-data" type="application/json">[{"category": "Writing Instruments (লেখার সরঞ্জাম)", "product": "Gel Pens (জেল পেন)", "factory": "义乌市承上文具有限公司 (Yiwu Chengshang Stationery)", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.03 - $0.15 per pc (প্রতি পিস $0.03 - $0.15)", "keywords": "中性笔批发 (Neutral Pen Wholesale)", "target": "Students + Officials (ছাত্র + অফিসিয়াল)"}, {"category": "Writing Instruments (লেখার সরঞ্জাম)", "product": "Ballpoint Pens (বলপয়েন্ট পেন)", "factory": "义乌市火喔文具 (Yiwu Huowo Stationery)", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.02 - $0.10 per pc (প্রতি পিস $0.02 - $0.10)", "keywords": "圆珠笔批发 (Ballpoint Pen Wholesale)", "target": "Students + Officials (ছাত্র + অফিসিয়াল)"}, {"category": "Writing Instruments (লেখার সরঞ্জাম)", "product": "Fountain Pens (ফাউন্টেন পেন)", "factory": "杭州爱惜文具有限公司 (Hangzhou Aixi Stationery)", "location": "Hangzhou, Zhejiang (杭州, 浙江)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.50 - $3.00 per pc (প্রতি পিস $0.50 - $3.00)", "keywords": "钢笔批发 (Fountain Pen Wholesale)", "target": "Officials + College Students (অফিসিয়াল + কলেজ ছাত্র)"}, {"category": "Writing Instruments (লেখার সরঞ্জাম)", "product": "Markers & Highlighters (মার্কার ও হাইলাইটার)", "factory": "创易宏图文化用品有限公司 (Chuangyi Hongtu Cultural)", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.10 - $0.50 per pc (প্রতি পিস $0.10 - $0.50)", "keywords": "荧光笔批发 (Highlighter Wholesale)", "target": "Students + Officials (ছাত্র + অফিসিয়াল)"}, {"category": "Writing Instruments (লেখার সরঞ্জাম)", "product": "Mechanical Pencils (মেকানিক্যাল পেন্সিল)", "factory": "桐庐县分水镇富杰文具厂 (Tonglu Fengshui Fujie Stationery)", "location": "Hangzhou, Zhejiang (杭州, 浙江)", "moq": "200-1000 pcs (200-1000 পিস)", "price": "$0.05 - $0.30 per pc (প্রতি পিস $0.05 - $0.30)", "keywords": "自动铅笔批发 (Mechanical Pencil Wholesale)", "target": "Students (ছাত্র)"}, {"category": "Notebooks & Paper (নোটবুক ও কাগজ)", "product": "Spiral Notebooks (স্পাইরাল নোটবুক)", "factory": "义乌市汇迈文具有限公司 (Yiwu Huimai Stationery)", "location": "Jinhua, Zhejiang (金华, 浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.10 - $0.50 per pc (প্রতি পিস $0.10 - $0.50)", "keywords": "笔记本批发 (Notebook Wholesale)", "target": "Students + Officials (ছাত্র + অফিসিয়াল)"}, {"category": "Notebooks & Paper (নোটবুক ও কাগজ)", "product": "Hardcover Notebooks (হার্ডকভার নোটবুক)", "factory": "深圳市永晋文具有限公司 (Shenzhen Yongjin Stationery)", "location": "Shenzhen, Guangdong (深圳, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "硬壳笔记本 (Hardcover Notebook)", "target": "Officials + College Students (অফিসিয়াল + কলেজ ছাত্র)"}, {"category": "Notebooks & Paper (নোটবুক ও কাগজ)", "product": "Sticky Notes (স্টিকি নোট)", "factory": "深州市三舜纸业有限公司 (Shenzhou Sanshun Paper)", "location": "Hebei (河北)", "moq": "500-1000 pcs (500-1000 পিস)", "price": "$0.02 - $0.10 per pc (প্রতি পিস $0.02 - $0.10)", "keywords": "便利贴批发 (Sticky Notes Wholesale)", "target": "Students + Officials (ছাত্র + অফিসিয়াল)"}, {"category": "Notebooks & Paper (নোটবুক ও কাগজ)", "product": "Copy Paper A4 (কপি কাগজ A4)", "factory": "嘉兴书昶办公用品有限公司 (Jiaxing Shuchang Office)", "location": "Jiaxing, Zhejiang (嘉兴, 浙江)", "moq": "1000+ pcs (1000+ পিস)", "price": "$0.01 - $0.05 per pc (প্রতি পিস $0.01 - $0.05)", "keywords": "A4打印纸 (A4 Copy Paper)", "target": "Officials (অফিসিয়াল)"}, {"category": "Notebooks & Paper (নোটবুক ও কাগজ)", "product": "Diary/Planner (ডায়েরি/প্ল্যানার)", "factory": "义乌市亿宁体育用品有限公司 (Yiwu Yining Sports)", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.50 - $3.00 per pc (প্রতি পিস $0.50 - $3.00)", "keywords": "日记本批发 (Diary Wholesale)", "target": "Officials + College Students (অফিসিয়াল + কলেজ ছাত্র)"}, {"category": "Office Supplies (অফিস সরঞ্জাম)", "product": "Staplers (স্ট্যাপলার)", "factory": "佛山闪购时刻贸易部 (Foshan Shangou Trading)", "location": "Foshan, Guangdong (佛山, 广东)", "moq": "30-100 pcs (30-100 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "订书机批发 (Stapler Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Office Supplies (অফিস সরঞ্জাম)", "product": "Hole Punch (হোল পাঞ্চ)", "factory": "义乌市恒慈供应链 (Yiwu Hengci Supply Chain)", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "50-200 pcs (50-200 পিস)", "price": "$1.00 - $3.00 per pc (প্রতি পিস $1.00 - $3.00)", "keywords": "打孔机批发 (Hole Punch Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Office Supplies (অফিস সরঞ্জাম)", "product": "Paper Clips (পেপার ক্লিপ)", "factory": "义乌市雷瀚文体用品厂 (Yiwu Leihan Stationery)", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.01 - $0.05 per pc (প্রতি পিস $0.01 - $0.05)", "keywords": "回形针批发 (Paper Clip Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Office Supplies (অফিস সরঞ্জাম)", "product": "Binder Clips (বাইন্ডার ক্লিপ)", "factory": "汕头市钦平塑料厂 (Shantou Qinping Plastic)", "location": "Shantou, Guangdong (汕头, 广东)", "moq": "500-1000 pcs (500-1000 পিস)", "price": "$0.01 - $0.10 per pc (প্রতি পিস $0.01 - $0.10)", "keywords": "长尾夹批发 (Binder Clip Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Office Supplies (অফিস সরঞ্জাম)", "product": "Correction Tape (করেকশন টেপ)", "factory": "义乌市逸宣塑料制品厂 (Yiwu Yixuan Plastic)", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.10 - $0.50 per pc (প্রতি পিস $0.10 - $0.50)", "keywords": "修正带批发 (Correction Tape Wholesale)", "target": "Students + Officials (ছাত্র + অফিসিয়াল)"}, {"category": "School Supplies (স্কুল সরঞ্জাম)", "product": "Pencil Cases (পেন্সিল কেস)", "factory": "Yiwu Bozhong Stationery Co., Ltd.", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "笔袋批发 (Pencil Case Wholesale)", "target": "Students (ছাত্র)"}, {"category": "School Supplies (স্কুল সরঞ্জাম)", "product": "Rulers & Geometry Sets (রুলার ও জ্যামিতি সেট)", "factory": "青田力洋文具有限公司 (Qingtian Liyang Stationery)", "location": "Qingtian, Zhejiang (青田, 浙江)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.10 - $0.50 per pc (প্রতি পিস $0.10 - $0.50)", "keywords": "尺子套装批发 (Ruler Set Wholesale)", "target": "Students (ছাত্র)"}, {"category": "School Supplies (স্কুল সরঞ্জাম)", "product": "Erasers (ইরেজার)", "factory": "上海伴宁办公用品 (Shanghai Banning Office)", "location": "Shanghai (上海)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.01 - $0.10 per pc (প্রতি পিস $0.01 - $0.10)", "keywords": "橡皮擦批发 (Eraser Wholesale)", "target": "Students (ছাত্র)"}, {"category": "School Supplies (স্কুল সরঞ্জাম)", "product": "Sharpeners (শার্পনার)", "factory": "临沂易得力商贸 (Linyi Yideli Trading)", "location": "Linyi, Shandong (临沂, 山东)", "moq": "200-1000 pcs (200-1000 পিস)", "price": "$0.05 - $0.30 per pc (প্রতি পিস $0.05 - $0.30)", "keywords": "卷笔刀批发 (Sharpener Wholesale)", "target": "Students (ছাত্র)"}, {"category": "School Supplies (স্কুল সরঞ্জাম)", "product": "School Bags (স্কুল ব্যাগ)", "factory": "上海雄鹰文具 (Shanghai Xiongying Stationery)", "location": "Shanghai (上海)", "moq": "50-200 pcs (50-200 পিস)", "price": "$2.00 - $10.00 per pc (প্রতি পিস $2.00 - $10.00)", "keywords": "书包批发 (School Bag Wholesale)", "target": "Students (ছাত্র)"}, {"category": "Art & Craft (শিল্প ও হস্তশিল্প)", "product": "Colored Pencils (রঙিন পেন্সিল)", "factory": "True Color Stationery Co., Ltd.", "location": "Guangzhou, Guangdong (广州, 广东)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.10 - $0.50 per pc (প্রতি পিস $0.10 - $0.50)", "keywords": "彩色铅笔批发 (Colored Pencil Wholesale)", "target": "Students (ছাত্র)"}, {"category": "Art & Craft (শিল্প ও হস্তশিল্প)", "product": "Watercolor Sets (ওয়াটারকালার সেট)", "factory": "Guangbo Group Stock Co., Ltd.", "location": "Ningbo, Zhejiang (宁波, 浙江)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "水彩颜料批发 (Watercolor Wholesale)", "target": "Students (ছাত্র)"}, {"category": "Art & Craft (শিল্প ও হস্তশিল্প)", "product": "Sketch Books (স্কেচ বুক)", "factory": "Deli Group (得力集团)", "location": "Ningbo, Zhejiang (宁波, 浙江)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "素描本批发 (Sketch Book Wholesale)", "target": "Students + College (ছাত্র + কলেজ)"}, {"category": "Art & Craft (শিল্প ও হস্তশিল্প)", "product": "Craft Scissors (ক্রাফ্ট কাঁচি)", "factory": "Shanghai M&G Stationery Inc.", "location": "Shanghai (上海)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.10 - $0.50 per pc (প্রতি পিস $0.10 - $0.50)", "keywords": "剪刀批发 (Scissors Wholesale)", "target": "Students (ছাত্র)"}, {"category": "Art & Craft (শিল্প ও হস্তশিল্প)", "product": "Glue Sticks (গ্লু স্টিক)", "factory": "Comix Group Co., Ltd.", "location": "Shenzhen, Guangdong (深圳, 广东)", "moq": "200-1000 pcs (200-1000 পিস)", "price": "$0.05 - $0.30 per pc (প্রতি পিস $0.05 - $0.30)", "keywords": "胶棒批发 (Glue Stick Wholesale)", "target": "Students (ছাত্র)"}, {"category": "Filing & Organization (ফাইলিং ও সংগঠন)", "product": "File Folders (ফাইল ফোল্ডার)", "factory": "昆山永得鑫商贸有限公司 (Kunshan Yongdexin Trading)", "location": "Kunshan, Jiangsu (昆山, 江苏)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.10 - $0.50 per pc (প্রতি পিস $0.10 - $0.50)", "keywords": "文件夹批发 (File Folder Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Filing & Organization (ফাইলিং ও সংগঠন)", "product": "Document Trays (ডকুমেন্ট ট্রে)", "factory": "武汉思进文化用品 (Wuhan Sijin Cultural)", "location": "Wuhan, Hubei (武汉, 湖北)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "文件架批发 (Document Tray Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Filing & Organization (ফাইলিং ও সংগঠন)", "product": "Index Dividers (ইনডেক্স ডিভাইডার)", "factory": "重庆得力展示厅 (Chongqing Deli Showroom)", "location": "Chongqing (重庆)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.05 - $0.30 per pc (প্রতি পিস $0.05 - $0.30)", "keywords": "索引页批发 (Index Divider Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Filing & Organization (ফাইলিং ও সংগঠন)", "product": "Zipper Bags (জিপার ব্যাগ)", "factory": "佛山鸿利贸易部 (Foshan Hongli Trading)", "location": "Foshan, Guangdong (佛山, 广东)", "moq": "200-1000 pcs (200-1000 পিস)", "price": "$0.10 - $0.50 per pc (প্রতি পিস $0.10 - $0.50)", "keywords": "拉链袋批发 (Zipper Bag Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Filing & Organization (ফাইলিং ও সংগঠন)", "product": "Label Makers (লেবেল মেকার)", "factory": "南京浩通电子商务 (Nanjing Haotong E-commerce)", "location": "Nanjing, Jiangsu (南京, 江苏)", "moq": "50-100 pcs (50-100 পিস)", "price": "$1.00 - $5.00 per pc (প্রতি পিস $1.00 - $5.00)", "keywords": "标签机批发 (Label Maker Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Desktop Accessories (ডেস্কটপ এক্সেসরিজ)", "product": "Pen Holders (পেন হোল্ডার)", "factory": "广州涛瑞供应链有限公司 (Guangzhou Taorui Supply Chain)", "location": "Guangzhou, Guangdong (广州, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "笔筒批发 (Pen Holder Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Desktop Accessories (ডেস্কটপ এক্সেসরিজ)", "product": "Desk Organizers (ডেস্ক অর্গানাইজার)", "factory": "深圳楚尧心选科技有限公司 (Shenzhen Chuyao Technology)", "location": "Shenzhen, Guangdong (深圳, 广东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$1.00 - $5.00 per pc (প্রতি পিস $1.00 - $5.00)", "keywords": "桌面收纳盒 (Desk Organizer)", "target": "Officials (অফিসিয়াল)"}, {"category": "Desktop Accessories (ডেস্কটপ এক্সেসরিজ)", "product": "Letter Trays (লেটার ট্রে)", "factory": "印特美纸业 (Yintemei Paper)", "location": "Zhejiang (浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "文件盘批发 (Letter Tray Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Desktop Accessories (ডেস্কটপ এক্সেসরিজ)", "product": "Business Card Holders (বিজনেস কার্ড হোল্ডার)", "factory": "临沂森煜文化用品有限公司 (Linyi Senyu Cultural)", "location": "Linyi, Shandong (临沂, 山东)", "moq": "50-200 pcs (50-200 পিস)", "price": "$0.50 - $2.00 per pc (প্রতি পিস $0.50 - $2.00)", "keywords": "名片夹批发 (Card Holder Wholesale)", "target": "Officials (অফিসিয়াল)"}, {"category": "Desktop Accessories (ডেস্কটপ এক্সেসরিজ)", "product": "Desk Mats (ডেস্ক ম্যাট)", "factory": "义乌市逸宣塑料制品厂 (Yiwu Yixuan Plastic)", "location": "Yiwu, Zhejiang (义乌, 浙江)", "moq": "100-500 pcs (100-500 পিস)", "price": "$1.00 - $5.00 per pc (প্রতি পিস $1.00 - $5.00)", "keywords": "桌垫批发 (Desk Mat Wholesale)", "target": "Officials (অফিসিয়াল)"}]</script>
+
+<script>
+(function(){
+  "use strict";
+
+  var TOYS = JSON.parse(document.getElementById('toys-data').textContent);
+  var STATIONERY = JSON.parse(document.getElementById('stationery-data').textContent);
+
+  /* ---------------- Nav scroll transform ---------------- */
+  var nav = document.getElementById('siteNav');
+  function onScroll(){
+    if (window.scrollY > 100) nav.classList.add('is-scrolled');
+    else nav.classList.remove('is-scrolled');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---------------- Stats band ---------------- */
+  function uniq(arr, key){
+    var s = {};
+    arr.forEach(function(it){ if (it[key]) s[it[key]] = true; });
+    return Object.keys(s);
+  }
+  var allItems = TOYS.concat(STATIONERY);
+  document.getElementById('statTotal').textContent = allItems.length;
+  document.getElementById('statCategories').textContent = uniq(TOYS,'category').length + uniq(STATIONERY,'category').length;
+  document.getElementById('statFactories').textContent = uniq(allItems,'factory').length;
+
+  (function avgMargin(){
+    var vals = [];
+    TOYS.forEach(function(t){
+      var m = t.margin.match(/(\d+)\s*-\s*(\d+)/);
+      if (m) vals.push((parseInt(m[1],10)+parseInt(m[2],10))/2);
+    });
+    var avg = vals.reduce(function(a,b){return a+b;},0) / vals.length;
+    document.getElementById('statMargin').textContent = Math.round(avg) + '%';
+  })();
+
+  /* ---------------- Catalog state ---------------- */
+  var state = { dataset: 'toys', category: 'all', query: '' };
+
+  function cleanLabel(str){
+    // shows the English portion before the parenthetical Bangla for compact eyebrow/labels
+    var m = str.match(/^(.*?)\s*\(/);
+    return m ? m[1].trim() : str;
+  }
+
+  function currentData(){ return state.dataset === 'toys' ? TOYS : STATIONERY; }
+
+  function populateCategorySelect(){
+    var sel = document.getElementById('categorySelect');
+    var cats = uniq(currentData(), 'category').sort();
+    sel.innerHTML = '<option value="all">All categories</option>' +
+      cats.map(function(c){ return '<option value="'+encodeURIComponent(c)+'">'+cleanLabel(c)+'</option>'; }).join('');
+    state.category = 'all';
+  }
+
+  function filteredData(){
+    var data = currentData();
+    var q = state.query.trim().toLowerCase();
+    return data.filter(function(it){
+      if (state.category !== 'all' && it.category !== decodeURIComponent(state.category)) return false;
+      if (!q) return true;
+      var hay = (it.product + ' ' + it.factory + ' ' + it.keywords + ' ' + it.category).toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+  }
+
+  function cardHTML(it, idx){
+    var extra = state.dataset === 'toys'
+      ? '<dt>Margin</dt><dd>'+it.margin+'</dd><dt>Seasonal demand</dt><dd>'+it.demand+'</dd>'
+      : '<dt>Target customer</dt><dd>'+it.target+'</dd>';
+    var id = 'card-' + state.dataset + '-' + idx;
+    return (
+      '<div class="card" role="button" tabindex="0" aria-expanded="false" aria-describedby="'+id+'-reveal" data-idx="'+idx+'">' +
+        '<span class="card-eyebrow">'+cleanLabel(it.category)+'</span>' +
+        '<h3 class="card-title">'+cleanLabel(it.product)+'</h3>' +
+        '<div class="card-meta">' +
+          '<span><b>Location:</b> '+cleanLabel(it.location)+'</span>' +
+          '<span><b>Price:</b> '+cleanLabel(it.price)+'</span>' +
+          '<span><b>MOQ:</b> '+cleanLabel(it.moq)+'</span>' +
+        '</div>' +
+        '<div class="card-reveal" id="'+id+'-reveal">' +
+          '<dl>' +
+            '<dt>Factory</dt><dd>'+it.factory+'</dd>' +
+            '<dt>1688 search keyword</dt><dd>'+it.keywords+'</dd>' +
+            extra +
+          '</dl>' +
+          '<span class="card-reveal-hint">Full profile</span>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderCards(){
+    var grid = document.getElementById('cardGrid');
+    var data = filteredData();
+    document.getElementById('resultCount').textContent = 'Showing ' + data.length + ' of ' + currentData().length + ' items';
+    if (!data.length){
+      grid.innerHTML = '<div class="empty-state"><strong>No matches</strong>Try a different search term or category.</div>';
+      return;
+    }
+    grid.innerHTML = data.map(cardHTML).join('');
+
+    grid.querySelectorAll('.card').forEach(function(card){
+      function toggle(){
+        var open = card.classList.toggle('is-open');
+        card.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      card.addEventListener('click', toggle);
+      card.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+      });
+    });
+  }
+
+  /* ---------------- Filter bar events ---------------- */
+  document.querySelectorAll('.dataset-toggle button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.dataset-toggle button').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+      btn.setAttribute('aria-pressed','true');
+      state.dataset = btn.getAttribute('data-dataset');
+      state.query = '';
+      document.getElementById('searchInput').value = '';
+      populateCategorySelect();
+      renderCards();
+    });
+  });
+
+  document.getElementById('searchInput').addEventListener('input', function(e){
+    state.query = e.target.value;
+    renderCards();
+  });
+
+  document.getElementById('categorySelect').addEventListener('change', function(e){
+    state.category = e.target.value;
+    renderCards();
+  });
+
+  /* ---------------- Category cards ---------------- */
+  function categoryCounts(data){
+    var counts = {};
+    data.forEach(function(it){ counts[it.category] = (counts[it.category]||0) + 1; });
+    return counts;
+  }
+
+  function renderCategoryGrid(){
+    var wrap = document.getElementById('categoryGrid');
+    var toyCounts = categoryCounts(TOYS);
+    var statCounts = categoryCounts(STATIONERY);
+    var html = '';
+    Object.keys(toyCounts).sort().forEach(function(c){
+      html += '<button type="button" class="category-card" data-dataset="toys" data-category="'+encodeURIComponent(c)+'">' +
+        '<span class="cc-set">Toys</span><h3>'+cleanLabel(c)+'</h3>' +
+        '<span class="cc-count">'+toyCounts[c]+' sourcing '+(toyCounts[c]===1?'point':'points')+'</span></button>';
+    });
+    Object.keys(statCounts).sort().forEach(function(c){
+      html += '<button type="button" class="category-card" data-dataset="stationery" data-category="'+encodeURIComponent(c)+'">' +
+        '<span class="cc-set">Stationery</span><h3>'+cleanLabel(c)+'</h3>' +
+        '<span class="cc-count">'+statCounts[c]+' sourcing '+(statCounts[c]===1?'point':'points')+'</span></button>';
+    });
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll('.category-card').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var ds = btn.getAttribute('data-dataset');
+        var cat = btn.getAttribute('data-category');
+        document.querySelectorAll('.dataset-toggle button').forEach(function(b){
+          b.setAttribute('aria-pressed', b.getAttribute('data-dataset') === ds ? 'true' : 'false');
+        });
+        state.dataset = ds;
+        populateCategorySelect();
+        state.category = cat;
+        document.getElementById('categorySelect').value = cat;
+        state.query = '';
+        document.getElementById('searchInput').value = '';
+        renderCards();
+        document.getElementById('catalog').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }
+
+  /* ---------------- Insights bar chart ---------------- */
+  function renderInsights(){
+    var all = {};
+    TOYS.forEach(function(it){ all[cleanLabel(it.category)] = (all[cleanLabel(it.category)]||0)+1; });
+    STATIONERY.forEach(function(it){ all[cleanLabel(it.category)] = (all[cleanLabel(it.category)]||0)+1; });
+    var entries = Object.keys(all).map(function(k){ return [k, all[k]]; }).sort(function(a,b){ return b[1]-a[1]; });
+    var max = entries[0][1];
+    var list = document.getElementById('barList');
+    list.innerHTML = entries.map(function(e){
+      var pct = Math.round((e[1]/max)*100);
+      return '<div class="bar-row"><span class="bar-label">'+e[0]+'</span>' +
+        '<span class="bar-track"><span class="bar-fill" style="width:'+pct+'%"></span></span>' +
+        '<span class="bar-value">'+e[1]+'</span></div>';
+    }).join('');
+  }
+
+  /* ---------------- Init ---------------- */
+  populateCategorySelect();
+  renderCards();
+  renderCategoryGrid();
+  renderInsights();
+
+  /* ---------------- PWA: service worker registration ---------------- */
+  if ('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){ /* offline install unsupported, ignore */ });
+    });
+  }
+
+})();
+</script>
+
+</body>
+</html>
